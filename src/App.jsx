@@ -1,5 +1,6 @@
 import { useEffect, useReducer, useRef, useState } from "react";
 import {
+  buildLanguagePath,
   ensureLanguagePath,
   getLanguageFromPathname,
   getDailyBoard,
@@ -457,7 +458,7 @@ export default function App() {
   }
 
   function handleLanguageChange(language) {
-    window.history.pushState(null, "", `/${language}${window.location.search}${window.location.hash}`);
+    window.history.pushState(null, "", `${buildLanguagePath(language)}${window.location.search}${window.location.hash}`);
     dispatchAndSync({ type: "SET_ROUTE_LANGUAGE", language });
   }
 

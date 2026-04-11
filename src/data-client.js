@@ -83,6 +83,16 @@ export function normalizeLanguageCode(value) {
 }
 
 const REQUESTED_DEFAULT_LANGUAGE = normalizeLanguageCode(import.meta.env.VITE_DEFAULT_LANGUAGE) || "en";
+
+// Normalize the Vite base URL to an absolute path prefix that always ends with "/".
+// Relative bases (e.g. "./") are treated as root for the history API.
+function getBasePath() {
+  const base = import.meta.env.BASE_URL || "/";
+  if (!base.startsWith("/")) return "/";
+  return base.endsWith("/") ? base : base + "/";
+}
+
+const BASE_PATH = getBasePath();
 const DEFAULT_MINIMUM_WORD_LENGTH = 3;
 const DEFAULT_MAXIMUM_WORDS = 6;
 const DAILY_SCHEDULE_EPOCH_UTC_MS = Date.UTC(2026, 0, 1);
@@ -106,13 +116,41 @@ const DEFAULT_LANGUAGE = supportedLanguages.includes(REQUESTED_DEFAULT_LANGUAGE)
   : (supportedLanguages[0] || REQUESTED_DEFAULT_LANGUAGE);
 
 /**
+ * Strips the Vite base path prefix from a pathname, returning the app-relative portion.
+ *
+ * e.g. with BASE_PATH "/Daily-Boards/", "/Daily-Boards/en" → "/en"
+ *
+ * @param {string} pathname - The full browser pathname.
+ * @returns {string} The pathname with the base prefix removed.
+ */
+function stripBasePath(pathname) {
+  const prefix = BASE_PATH === "/" ? "" : BASE_PATH.slice(0, -1); // e.g. "/Daily-Boards"
+  if (prefix && pathname.startsWith(prefix)) {
+    return pathname.slice(prefix.length) || "/";
+  }
+  return pathname;
+}
+
+/**
+ * Builds an absolute URL path for a given language, including the Vite base prefix.
+ *
+ * e.g. with BASE_PATH "/Daily-Boards/", buildLanguagePath("en") → "/Daily-Boards/en"
+ *
+ * @param {string} language - The normalized language code.
+ * @returns {string} The full path to use with the history API.
+ */
+export function buildLanguagePath(language) {
+  return `${BASE_PATH}${language}`;
+}
+
+/**
  * Returns the active language code from the first pathname segment.
  *
  * @param {string} pathname - The browser pathname to inspect.
  * @returns {string} The requested language or the default language.
  */
 export function getLanguageFromPathname(pathname = window.location.pathname) {
-  const [firstSegment = ""] = pathname.split("/").filter(Boolean);
+  const [firstSegment = ""] = stripBasePath(pathname).split("/").filter(Boolean);
   return getSupportedLanguage(firstSegment);
 }
 
@@ -123,13 +161,13 @@ export function getLanguageFromPathname(pathname = window.location.pathname) {
  */
 export function ensureLanguagePath() {
   const normalizedLanguage = getLanguageFromPathname();
-  const [firstSegment = ""] = window.location.pathname.split("/").filter(Boolean);
+  const [firstSegment = ""] = stripBasePath(window.location.pathname).split("/").filter(Boolean);
 
   if (getSupportedLanguage(firstSegment) !== firstSegment || !firstSegment) {
     window.history.replaceState(
       null,
       "",
-      `/${normalizedLanguage}${window.location.search}${window.location.hash}`,
+      `${buildLanguagePath(normalizedLanguage)}${window.location.search}${window.location.hash}`,
     );
   }
 
