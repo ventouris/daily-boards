@@ -1,0 +1,21 @@
+Gridly Blitz
+Copyright (c) 2026 Tasos Ventouris
+
+---
+
+This project includes word list data derived from SCOWL (Spell Checker Oriented
+Word Lists), Copyright 2000-2018 by Kevin Atkinson.
+
+The English dictionary shipped with this project was exported from the
+hunspell-en-us package, which is based on SCOWL. Used under the following terms:
+
+  Permission to use, copy, modify, distribute and sell these word lists, or
+  portions of them, in any product or as part of a freely redistributable
+  product is hereby granted without fee, provided that either (1) the above
+  copyright notices and this permission notice appear in all copies of any
+  software product or product documentation derived from the word list or
+  (2) the word list is credited in a manner appropriate to your software or
+  documentation.
+
+SCOWL home page: https://wordlist.aspell.net/
+Full SCOWL license: https://wordlist.aspell.net/scowl-readme/

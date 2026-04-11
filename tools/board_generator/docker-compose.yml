@@ -1,0 +1,43 @@
+services:
+  dictionary-export:
+    build:
+      context: .
+      target: dictionary-export
+    environment:
+      PYTHONUNBUFFERED: "1"
+    command:
+      - --language
+      - "en"
+      - --output
+      - /frontend-data/dictionaries/en.txt
+      - --skip-if-exists
+    restart: "no"
+    volumes:
+      - type: bind
+        source: ../../src/data/dictionaries
+        target: /frontend-data/dictionaries
+
+  board-generator:
+    build:
+      context: .
+      target: board-generator
+    environment:
+      PYTHONUNBUFFERED: "1"
+    depends_on:
+      dictionary-export:
+        condition: service_completed_successfully
+    command:
+      - --count
+      - "500"
+      - --sizes
+      - "5x5,6x6,7x7,8x8,9x9,10x10"
+      - --language
+      - "en"
+      - --dictionary-file
+      - /frontend-data/dictionaries/en.txt
+      - --output
+      - /frontend-data/boards/boards_en.txt
+    volumes:
+      - type: bind
+        source: ../../src/data
+        target: /frontend-data

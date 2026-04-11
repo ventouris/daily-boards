@@ -1,3 +1,12 @@
+# Claude Code local config (contains machine-specific paths and local permissions)
+.claude/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyd
+.python-version
+
 # Logs
 logs
 *.log

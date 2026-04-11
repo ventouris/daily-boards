@@ -1,0 +1,69 @@
+name: Generate Boards
+
+on:
+  workflow_dispatch:
+    inputs:
+      years:
+        description: "Comma-separated years to generate (e.g. 2026,2027)"
+        required: true
+        default: "2026"
+      sizes:
+        description: "Comma-separated board sizes (e.g. 4x4,5x5)"
+        required: true
+        default: "4x4,5x5"
+      language:
+        description: "Language code (must match a file in src/data/dictionaries/)"
+        required: true
+        default: "en"
+
+  # Runs on November 1st each year to pre-generate boards for the coming year.
+  schedule:
+    - cron: "0 6 1 11 *"
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # Resolve parameters: use workflow_dispatch inputs when available,
+      # otherwise fall back to sensible defaults for scheduled runs.
+      - name: Resolve parameters
+        id: params
+        run: |
+          if [ -n "${{ github.event.inputs.years }}" ]; then
+            echo "years=${{ github.event.inputs.years }}" >> $GITHUB_OUTPUT
+            echo "sizes=${{ github.event.inputs.sizes }}" >> $GITHUB_OUTPUT
+            echo "language=${{ github.event.inputs.language }}" >> $GITHUB_OUTPUT
+          else
+            NEXT_YEAR=$(python3 -c "import datetime; print(datetime.date.today().year + 1)")
+            echo "years=$NEXT_YEAR" >> $GITHUB_OUTPUT
+            echo "sizes=4x4,5x5" >> $GITHUB_OUTPUT
+            echo "language=en" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Generate boards
+        working-directory: tools/board_generator
+        run: |
+          python generate_boards.py \
+            --years ${{ steps.params.outputs.years }} \
+            --sizes ${{ steps.params.outputs.sizes }} \
+            --language ${{ steps.params.outputs.language }} \
+            --dictionary-file ../../src/data/dictionaries/${{ steps.params.outputs.language }}.txt \
+            --output-dir ../../src/data/boards
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add src/data/boards/
+          git diff --staged --quiet && echo "No new boards to commit." && exit 0
+          git commit -m "chore: generate boards for ${{ steps.params.outputs.years }} [${{ steps.params.outputs.language }}]"
+          git push
