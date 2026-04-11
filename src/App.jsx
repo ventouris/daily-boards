@@ -300,7 +300,6 @@ export default function App() {
   const currentWordRef = useRef(null);
   const submitTimeoutRef = useRef(null);
   const tileRefs = useRef(new Map());
-  const gestureRef = useRef({ dragging: false, activePointerId: null, suppressClick: false });
 
   // Destructure for convenience in JSX.
   const {
@@ -508,68 +507,10 @@ export default function App() {
     return true;
   }
 
-  function suppressNextClick() {
-    gestureRef.current.suppressClick = true;
-  }
-
-  // ── Pointer handlers ─────────────────────────────────────────────────────────
-
-  function handlePointerDown(event) {
-    if (!canInteract) return;
-    const tile = event.target.closest(".tile");
-    if (!tile) return;
-
-    const cell = tileToCell(tile);
-    const existingIndex = stateRef.current.currentPath.findIndex((pathCell) => isSameCell(pathCell, cell));
-
-    if (existingIndex !== -1) {
-      stepPath(cell);
-      suppressNextClick();
-      return;
-    }
-
-    const started = beginGesture(cell);
-    if (!started) {
-      suppressNextClick();
-      return;
-    }
-
-    gestureRef.current.dragging = true;
-    gestureRef.current.activePointerId = event.pointerId;
-    gestureRef.current.suppressClick = false;
-    event.currentTarget.setPointerCapture(event.pointerId);
-  }
-
-  function handlePointerMove(event) {
-    if (!canInteract || !gestureRef.current.dragging || gestureRef.current.activePointerId !== event.pointerId) return;
-
-    const tile = document.elementFromPoint(event.clientX, event.clientY)?.closest(".tile");
-    if (!tile) return;
-
-    const previousLength = stateRef.current.currentPath.length;
-    stepPath(tileToCell(tile));
-    if (stateRef.current.currentPath.length !== previousLength) {
-      suppressNextClick();
-    }
-  }
-
-  function handlePointerUp(event) {
-    if (gestureRef.current.activePointerId !== event.pointerId) return;
-    gestureRef.current.dragging = false;
-    gestureRef.current.activePointerId = null;
-    try {
-      event.currentTarget.releasePointerCapture(event.pointerId);
-    } catch {
-      // Ignore pointer release issues.
-    }
-  }
+  // ── Tile click ───────────────────────────────────────────────────────────────
 
   function handleTileClick(event) {
     if (!canInteract) return;
-    if (gestureRef.current.suppressClick) {
-      gestureRef.current.suppressClick = false;
-      return;
-    }
     const cell = tileToCell(event.currentTarget);
     if (stateRef.current.currentPath.length === 0) {
       beginGesture(cell);
@@ -826,9 +767,6 @@ export default function App() {
         registerTileRef={registerTileRef}
         onStart={handleStartGame}
         onHelpOpen={() => dispatchAndSync({ type: "OPEN_HELP" })}
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
         onTileClick={handleTileClick}
         onTileAnimationEnd={handleTileAnimationEnd}
       />

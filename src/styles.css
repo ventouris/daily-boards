@@ -271,7 +271,7 @@ button:disabled,
   display: grid;
   grid-template-columns: repeat(var(--board-size), minmax(0, 1fr));
   gap: 0.35rem;
-  touch-action: none;
+  touch-action: manipulation;
 }
 
 .connections-layer {

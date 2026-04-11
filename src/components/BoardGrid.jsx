@@ -48,9 +48,6 @@ export default function BoardGrid({
   registerTileRef,
   onStart,
   onHelpOpen,
-  onPointerDown,
-  onPointerMove,
-  onPointerUp,
   onTileClick,
   onTileAnimationEnd,
 }) {
@@ -78,10 +75,6 @@ export default function BoardGrid({
           role="grid"
           aria-label="Gridly board"
           style={board.grid.length ? { "--board-size": board.grid[0].length } : undefined}
-          onPointerDown={onPointerDown}
-          onPointerMove={onPointerMove}
-          onPointerUp={onPointerUp}
-          onPointerCancel={onPointerUp}
         >
           {board.grid.map((row, rowIndex) =>
             row.map((letter, colIndex) => {
