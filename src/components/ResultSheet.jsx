@@ -1,6 +1,16 @@
 import { useState, useEffect, useRef } from "react";
 import { formatDuration } from "../game-engine.js";
 
+function formatCountdown(ms) {
+  const totalMinutes = Math.floor(ms / 60000);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  if (hours > 0 && minutes > 0) return `${hours} hour${hours !== 1 ? "s" : ""} and ${minutes} minute${minutes !== 1 ? "s" : ""}`;
+  if (hours > 0) return `${hours} hour${hours !== 1 ? "s" : ""}`;
+  if (minutes > 0) return `${minutes} minute${minutes !== 1 ? "s" : ""}`;
+  return "less than a minute";
+}
+
 function getMsUntilNextPuzzle() {
   const now = new Date();
   const next = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1));
@@ -98,7 +108,7 @@ export default function ResultSheet({
         <pre className="share-preview">{shareText}</pre>
 
         <p className="result-countdown">
-          Next puzzle in <strong>{formatDuration(countdown)}</strong>
+          Next board in <strong>{formatCountdown(countdown)}</strong>
         </p>
 
         <footer className="sheet-actions">
