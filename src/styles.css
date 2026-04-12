@@ -693,7 +693,7 @@ button:disabled,
 }
 
 .result-countdown {
-  margin: 0.8rem 0 0;
+  margin: .8rem 0 .8rem 0;
   font-size: 0.88rem;
   color: var(--muted);
   text-align: center;
