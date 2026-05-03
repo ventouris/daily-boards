@@ -814,6 +814,10 @@ export default function App() {
         onShare={handleShare}
         onClose={() => dispatchAndSync({ type: "CLOSE_RESULT" })}
       />
+
+      <footer className="privacy-footer">
+        <p>We use Umami, a privacy-first analytics service, to count page views only.</p>
+      </footer>
     </div>
   );
 }

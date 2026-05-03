@@ -932,6 +932,21 @@ button:disabled,
   }
 }
 
+/* ─── Privacy footer ──────────────────────────────────────────────────────── */
+.privacy-footer {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+  text-align: center;
+}
+
+.privacy-footer p {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
 #root {
   min-height: 100vh;
 }
